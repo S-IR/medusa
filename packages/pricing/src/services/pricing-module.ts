@@ -6,23 +6,25 @@ import {
   ModuleJoinerConfig,
   PricingTypes,
 } from "@medusajs/types"
-import { Currency, MoneyAmount, PriceSet } from "@models"
+import { Currency, MoneyAmount, PriceSet, PriceList} from "@models"
 import { CurrencyService, MoneyAmountService, PriceSetService } from "@services"
 
 import {
   InjectManager,
   InjectTransactionManager,
   MedusaContext,
+  shouldForceTransaction,
 } from "@medusajs/utils"
 
-import { shouldForceTransaction } from "@medusajs/utils"
 import { joinerConfig } from "../joiner-config"
+import PriceListService from "./price-list"
 
 type InjectedDependencies = {
   baseRepository: DAL.RepositoryService
   currencyService: CurrencyService<any>
   moneyAmountService: MoneyAmountService<any>
   priceSetService: PriceSetService<any>
+  priceListService: PriceListService<any>
 }
 
 type PricingContext = {
@@ -32,6 +34,7 @@ type PricingContext = {
 export default class PricingModuleService<
   TPriceSet extends PriceSet = PriceSet,
   TMoneyAmount extends MoneyAmount = MoneyAmount,
+  TPriceList extends PriceList = PriceList,
   TCurrency extends Currency = Currency
 > implements PricingTypes.IPricingModuleService
 {
@@ -39,6 +42,7 @@ export default class PricingModuleService<
   protected readonly currencyService_: CurrencyService<TCurrency>
   protected readonly moneyAmountService_: MoneyAmountService<TMoneyAmount>
   protected readonly priceSetService_: PriceSetService<TPriceSet>
+  protected readonly priceListService_: PriceListService<TPriceList>
 
   constructor(
     {
@@ -46,6 +50,7 @@ export default class PricingModuleService<
       moneyAmountService,
       currencyService,
       priceSetService,
+      priceListService,
     }: InjectedDependencies,
     protected readonly moduleDeclaration: InternalModuleDeclaration
   ) {
@@ -53,6 +58,7 @@ export default class PricingModuleService<
     this.currencyService_ = currencyService
     this.moneyAmountService_ = moneyAmountService
     this.priceSetService_ = priceSetService
+    this.priceListService_ = priceListService
   }
 
   __joinerConfig(): ModuleJoinerConfig {
@@ -413,5 +419,116 @@ export default class PricingModuleService<
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     await this.currencyService_.delete(currencyCodes, sharedContext)
+  }
+
+
+  @InjectManager("baseRepository_")
+  async retrievePriceList(
+    code: string,
+    config: FindConfig<PricingTypes.PriceListDTO> = {},
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<PricingTypes.PriceListDTO> {
+    const priceList = await this.priceListService_.retrieve(
+      code,
+      config,
+      sharedContext
+    )
+
+    return this.baseRepository_.serialize<PricingTypes.PriceListDTO>(priceList, {
+      populate: true,
+    })
+  }
+
+  @InjectManager("baseRepository_")
+  async listPriceLists(
+    filters: PricingTypes.FilterablePriceListProps = {},
+    config: FindConfig<PricingTypes.PriceListDTO> = {},
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<PricingTypes.PriceListDTO[]> {
+    const priceLists = await this.priceListService_.list(
+      filters,
+      config,
+      sharedContext
+    )
+
+    return this.baseRepository_.serialize<PricingTypes.PriceListDTO[]>(
+      priceLists,
+      {
+        populate: true,
+      }
+    )
+  }
+
+  @InjectManager("baseRepository_")
+  async listAndCountPriceLists(
+    filters: PricingTypes.FilterablePriceListProps = {},
+    config: FindConfig<PricingTypes.PriceListDTO> = {},
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<[PricingTypes.PriceListDTO[], number]> {
+    const [currencies, count] = await this.priceListService_.listAndCount(
+      filters,
+      config,
+      sharedContext
+    )
+
+    return [
+      await this.baseRepository_.serialize<PricingTypes.PriceListDTO[]>(
+        currencies,
+        {
+          populate: true,
+        }
+      ),
+      count,
+    ]
+  }
+
+  @InjectTransactionManager(shouldForceTransaction, "baseRepository_")
+  async createPriceLists(
+    data: PricingTypes.CreatePriceListDTO[],
+    @MedusaContext() sharedContext: Context = {}
+  ) {
+    const priceLists = await Promise.all(data.map(async (priceList) => {
+      const { prices, ...rest } = priceList
+      const [createdPriceList] = await this.priceListService_.create(rest, sharedContext)
+
+      const moneyAmounts = await this.moneyAmountService_.addPriceListPrices(
+        createdPriceList.id,
+        prices
+      )
+
+      createdPriceList.prices = moneyAmounts
+
+      return createdPriceList
+    }))
+
+    return this.baseRepository_.serialize<PricingTypes.PriceListDTO[]>(
+      priceLists,
+      {
+        populate: true,
+      }
+    )
+  }
+
+  @InjectTransactionManager(shouldForceTransaction, "baseRepository_")
+  async updatePriceLists(
+    data: PricingTypes.UpdatePriceListDTO[],
+    @MedusaContext() sharedContext: Context = {}
+  ) {
+    const priceLists = await this.priceListService_.update(data, sharedContext)
+
+    return this.baseRepository_.serialize<PricingTypes.PriceListDTO[]>(
+      priceLists,
+      {
+        populate: true,
+      }
+    )
+  }
+
+  @InjectTransactionManager(shouldForceTransaction, "baseRepository_")
+  async deletePriceLists(
+    currencyCodes: string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    await this.priceListService_.delete(currencyCodes, sharedContext)
   }
 }
