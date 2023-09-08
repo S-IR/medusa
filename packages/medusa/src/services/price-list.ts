@@ -10,11 +10,11 @@ import { PriceListRepository } from "../repositories/price-list"
 import { ProductVariantRepository } from "../repositories/product-variant"
 import { FindConfig, Selector } from "../types/common"
 import {
-    CreatePriceListInput,
-    FilterablePriceListProps,
-    PriceListPriceCreateInput,
-    PriceListPriceUpdateInput,
-    UpdatePriceListInput,
+  CreatePriceListInput,
+  FilterablePriceListProps,
+  PriceListPriceCreateInput,
+  PriceListPriceUpdateInput,
+  UpdatePriceListInput,
 } from "../types/price-list"
 import { FilterableProductProps } from "../types/product"
 import { FilterableProductVariantProps } from "../types/product-variant"
