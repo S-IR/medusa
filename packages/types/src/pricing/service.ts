@@ -5,6 +5,7 @@ import {
   CalculatedPriceSetDTO,
   CreateCurrencyDTO,
   CreateMoneyAmountDTO,
+<<<<<<< HEAD
   CreatePriceSetDTO,
   CurrencyDTO,
   FilterableCurrencyProps,
@@ -16,6 +17,18 @@ import {
   UpdateCurrencyDTO,
   UpdateMoneyAmountDTO,
   UpdatePriceSetDTO,
+=======
+  CreatePriceListDTO,
+  CurrencyDTO,
+  FilterableCurrencyProps,
+  FilterableMoneyAmountProps,
+  FilterablePriceListProps,
+  MoneyAmountDTO,
+  PriceListDTO,
+  UpdateCurrencyDTO,
+  UpdateMoneyAmountDTO,
+  UpdatePriceListDTO,
+>>>>>>> e0cc483e6 (update types service for pricing)
 } from "./common"
 
 export interface IPricingModuleService {
@@ -116,6 +129,39 @@ export interface IPricingModuleService {
   ): Promise<CurrencyDTO[]>
 
   deleteCurrencies(
+    currencyCodes: string[],
+    sharedContext?: Context
+  ): Promise<void>
+
+  retrievePriceList(
+    code: string,
+    config: FindConfig<PriceListDTO>,
+    sharedContext?: Context
+  ): Promise<PriceListDTO> 
+
+  listPriceLists(
+    filters: FilterablePriceListProps,
+    config: FindConfig<PriceListDTO>,
+    sharedContext?: Context
+  ): Promise<PriceListDTO[]> 
+
+  listAndCountPriceLists(
+    filters: FilterablePriceListProps,
+    config: FindConfig<PriceListDTO>,
+    sharedContext?: Context
+  ): Promise<[PriceListDTO[], number]> 
+
+  createPriceLists(
+    data: CreatePriceListDTO[],
+    sharedContext?: Context
+  ) : Promise<PriceListDTO[]>
+
+  updatePriceLists(
+    data: UpdatePriceListDTO[],
+    sharedContext?: Context
+  ) : Promise<PriceListDTO[]>
+
+  deletePriceLists(
     currencyCodes: string[],
     sharedContext?: Context
   ): Promise<void>
