@@ -126,7 +126,7 @@ export interface IPricingModuleService {
   ): Promise<void>
 
   retrievePriceList(
-    code: string,
+    id: string,
     config: FindConfig<PriceListDTO>,
     sharedContext?: Context
   ): Promise<PriceListDTO> 
@@ -154,7 +154,7 @@ export interface IPricingModuleService {
   ) : Promise<PriceListDTO[]>
 
   deletePriceLists(
-    currencyCodes: string[],
+    ids: string[],
     sharedContext?: Context
   ): Promise<void>
 }
