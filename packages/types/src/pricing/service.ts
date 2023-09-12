@@ -1,35 +1,27 @@
-import { FindConfig } from "../common"
-import { ModuleJoinerConfig } from "../modules-sdk"
-import { Context } from "../shared-context"
 import {
   CalculatedPriceSetDTO,
   CreateCurrencyDTO,
   CreateMoneyAmountDTO,
-<<<<<<< HEAD
+  CreatePriceListDTO,
   CreatePriceSetDTO,
   CurrencyDTO,
   FilterableCurrencyProps,
   FilterableMoneyAmountProps,
+  FilterablePriceListProps,
   FilterablePriceSetProps,
   MoneyAmountDTO,
+  PriceListDTO,
   PriceSetDTO,
   PricingContext,
   UpdateCurrencyDTO,
   UpdateMoneyAmountDTO,
-  UpdatePriceSetDTO,
-=======
-  CreatePriceListDTO,
-  CurrencyDTO,
-  FilterableCurrencyProps,
-  FilterableMoneyAmountProps,
-  FilterablePriceListProps,
-  MoneyAmountDTO,
-  PriceListDTO,
-  UpdateCurrencyDTO,
-  UpdateMoneyAmountDTO,
   UpdatePriceListDTO,
->>>>>>> e0cc483e6 (update types service for pricing)
+  UpdatePriceSetDTO
 } from "./common"
+
+import { Context } from "../shared-context"
+import { FindConfig } from "../common"
+import { ModuleJoinerConfig } from "../modules-sdk"
 
 export interface IPricingModuleService {
   __joinerConfig(): ModuleJoinerConfig
